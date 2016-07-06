@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "cost-estimator-1364",
+  "private_key_id": "86291a3a7939df5b06393bc1404d9bffd8c05a31",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCWauAQDB/pZIpV\nCoRBtLUiUOnKQK62O0eYvjM+kEX5Vu5Dg9EzV1BYkATaHHHCYV/isjssXbGGA/Kd\n9joytLdHPVUk0tmG3jkXibEJsG8yQd0Cry27DuobdFNMVSWyEdCw2Fb6i8Iiyn3s\nC+nnBLzzBih9ry6QxlwWW9tCf0CXama6YQTqAoCwxVnKAaEWlXt0P1Go5i4tK80m\n3aLQsfSFYbeOepK6ty9vTnJdApIlOcSCIVcLj1/vHaW7k5zE1i0uSTJ20sEQsiK0\nofZ0PBG4h1G7pekJPhnzWorMy8BQhns7jNzNeRpfoe8V4Ftu3MNDzec5Wad+K/86\nWepTkyKZAgMBAAECggEBAJEpXUk/WkC0bae6eX6rta8DZUxx9eoZ9XOcAvpa45zI\n3zI68VbZ6ck+W+BeWQ7dSFsP5HlhhmQuRSNasDmlG8ddkmDyN0moBnMHx9nw8q8O\nzwq7IqgGsbmDHqxo8/MQrFUuw2oSHG3U+4ckzDvN38etZsA8ovTG6bIOPeDDzAMT\nCmp/EKZEMncQ3TrSkx3vSYmPpI2+DWGpQdwzgtVJjhGTjUA5fGA6OwD1qMosWW3W\nwc/egRGtTbi/6admpXrt0kRqqvno05+Yg/JT62pgBb2kTEBwZE5VT9Wot1YdLcrN\nBrVS7Vtz1ZRuu2K8PvyISsXhz74kn2D8dYBsVludXd0CgYEAyOe6It6gyI3FppnK\n3eJ9Gaf5lZ63zq5ANNsm4Q2ujBey/XG0tbJv+NEEgj3nwRMVuTh+Ahdue2yzsIXp\n7aIUfsF4UuKH8DRzVdXtJv9sBzETUJBdpdjQwIEzurukOIkCNiBTuGg1Y3mKZyG+\n5q2NPGlmdNbLCJIHf1viXLa0S4MCgYEAv6q6baltAlpVIcZTKS9yalnm7CwrrkzU\nEF/uJgGKF1RqLVppQmwidsvxfYagTgpbQUz2wOxY8k/FgmfXCci0LoX0ucGFbFw1\n2UnncXDjhI/v0mAlSsJj2EtiovsxqG11MtaHR12QrguqLFJYOsk02P+6mUEmjeZT\nqRDyED72crMCgYEArOU/euK829umTUntHCbeIkY8tFZzOJsdBl/ThbqQjF+Y2iQQ\nsI1vb2Hxz2QXHkGeYFgNmR8xJWbW/QNB3g+uM6esNShedImu+B+yh+0ousexJ5QW\nA7Qjcoe+TOVO3piKHqqTYg/MYl8mjLqt3zdcZLEQS1zOPgHuEdyxYbiaUKECgYBf\nQX+T3r9BixmCRqmv71fCyVl+CNnQr3g5hyO5mcxCmf6G+ccUbt+WAPfM9eqXvofp\n5VFBQnVWQBUeIXN69leuQ38EDsy7tPxCOHuhIoTArjR3brc593Bd3+FutL7SQUwc\n7weejT7JcRyrGGWnGbZ9HmNjpUB/B3iOrtBPCKu9BwKBgBjcEtohLjaNRcVHyKn7\nC+FfKR8Erv1o15yqSXbP53U+vtoRLWM5uZeNYFH4I+CSgX2k5GtHRKaLLOQEbpxk\n6kLlLGBjb/wHtsWyYhWZOqi2pr3rRqodX28z88J8clvsW70/Ly4eOygPX+qniL03\ns1GOT3fdN/nI0R6OZE1wDhA0\n-----END PRIVATE KEY-----\n",
+  "client_email": "cost-estimator@cost-estimator-1364.iam.gserviceaccount.com",
+  "client_id": "101111778291004674957",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/cost-estimator%40cost-estimator-1364.iam.gserviceaccount.com"
+}

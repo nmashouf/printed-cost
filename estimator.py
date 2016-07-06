@@ -128,7 +128,7 @@ class Cost_estimator:
 		print(' ')
 		print('TOTAL COST = $' + str(self.total_cost)[:4] + ' for ' + str(_2D_dim) + ' square meter(s)')
 		print(' ')
-		print('PERFORMANCE = $' + str(self.total_cost/self.performance)[:4] + '/kW') # total cost times user-defined m^2/kW value
+		print('COST PER UNIT POWER = $' + str(self.total_cost/self.performance)[:4] + '/kW') # total cost times user-defined m^2/kW value
 
 	def convert_to_vol_ratio(self):
 		"""Retrieves the mass ratio of each component in the recipe, calculates

@@ -6,4 +6,5 @@ Run the following code in command line
 ```
 pip install gspread
 pip install --upgrade oauth2client
+pip install PyOpenSSL
 ```

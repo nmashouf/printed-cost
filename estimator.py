@@ -12,7 +12,7 @@ How to run:
 1. Open command line (Terminal on a Mac) and go to the same folder this file is saved in.
 2. Execute the code in interactive mode: python -i CostEstimator.py
 3. Create a Cost_estimator instance (example -->) : 
-c = Cost_estimator({'electrode': [['AC', 17], ['AB', 1], ['GR', 2], ['PVDFHFP', 5], ['NMP', 40]], 'electrolyte': [['BMIMBF4', 11]]}, [1, 1], 'flexographic', 'Cheap Materials')
+c = Cost_estimator({'electrode': [['AC', 17], ['AB', 1], ['GR', 2], ['PVDFHFP', 5], ['NMP', 40]], 'electrolyte': [['BMIMBF4', 1], ['PVDFHFP', 1]]}, [1, 1], 'flexographic', 'Cheap Materials', .0000001/.000001, .1)
 4. Run the calculation: c.calculate_costs()
 
 """
@@ -30,25 +30,29 @@ database = gc.open("Printed Energy Storage Costs and Properties")
 class Cost_estimator:
 	"""Estimates the cost of a specific recipe with lxwxt dimensions using manufacturing_method.
 
-	RECIPE is a dictionary with keys 'electrode' (separate 'anode' and 'cathode' for batteries) and 'electrolyte', with values that are lists of 2D vectors with ingredient information
+	RECIPE is a dictionary with keys 'electrode' (separate 'anode' and 'cathode' for batteries) and 'electrolyte' (or 'layer' for unspecified layer type), with values that are lists of 2D vectors with ingredient information
 		ex. {'electrode': [['AC', mass ratio #], ['GR', mass ratio #]], 'electrolyte':['BMIMBF4': mass ratio #]}. Names are AC, AB, GR, PVDFHFP, NMP, BMIMBF4, ZN, MNO2
 	DIMENSIONS is a 2D vector of dimension values in meters [length, width]
 	MANUFACTURING_METHOD is a string of the name of a manufacturing method ('flexographic', 'screen', 'blade coating')
 	COST_SOURCE is a string of the user preference of the cost source. Options are 'Cheap Materials' (from sources like Alibaba) or 'Reliable Materials' (from sources like Argonne NL cost analyses)
-	PERFORMANCE is a value with units kW/m^2
+	POWER_PERFORMANCE is a value with units kW/m^2
+	ENERGY_PERFORMANCE is a value with units kWh/m^2
+	ADD_LAYERS is a list of additional layers as strings. ex: ['AG', 'AG'] where 'AG' corresponds to a layer of silver as electrical connections.
 	"""
 	
-	def __init__(self, recipe, dimensions, manufacturing_method, cost_source, performance):
+	def __init__(self, recipe, dimensions, manufacturing_method, cost_source, power_performance, energy_performance, add_layers=False):
 		self.recipe = recipe
 		self.dimensions = dimensions
 		self.manufacturing_method = manufacturing_method
-		self.performance = performance
+		self.power_performance = power_performance
+		self.energy_performance = energy_performance
 		self.electrode_vol_in_ml = 0
 		self.electrolyte_vol_in_ml = 0
 		self.total_cost = 0
 		self.user_specified_materials_worksheet = database.worksheet(cost_source)
 		self.manufacturing_worksheet = database.worksheet("Manufacturing Method")
 		self.log_worksheet = database.worksheet("Log")
+		self.add_layers = add_layers
 
 	def get_ratio(self, component):
 		return component[1]
@@ -91,7 +95,7 @@ class Cost_estimator:
 
 	def calc_layer_cost(self, key):
 		layer_total_cost = 0
-		if key == 'electrode':
+		if key == 'electrode' or key == 'layer':
 			volume = self.electrode_vol_in_ml
 		elif key == 'cathode' or key == 'anode':
 			volume = self.electrode_vol_in_ml/2
@@ -100,7 +104,6 @@ class Cost_estimator:
 		else:
 			return 'layer not recognized!'
 		layer_recipe = self.recipe[key]
-		print('INGREDIENT          LAYER          COST')
 		for ingredient_pair in layer_recipe:
 			ingredient_name = self.get_name(ingredient_pair)
 			volume_contribution = self.get_ratio(ingredient_pair)*volume
@@ -110,6 +113,19 @@ class Cost_estimator:
 			layer_total_cost += cost_contribution
 		return layer_total_cost
 
+	def special_layers(self, layer_list):
+		if layer_list:
+			total_cost = 0
+			for layer in layer_list:
+				layer_mass = self.electrode_vol_in_ml*self.get_density(layer)
+				layer_cost = layer_mass*self.get_material_cost(layer)
+				#print(layer + ' layer = $' + str(layer_cost)[:4])
+				print(layer + self.spaces(20-len(layer)) + 'add. layer' + self.spaces(15-len('add. layer')) + str(layer_cost)[:6])
+				total_cost += layer_cost
+			return total_cost
+		else:
+			return 0
+
 	def calculate_costs(self):
 		self.convert_to_vol_ratio()
 		_2D_dim = self.dimensions[0]*self.dimensions[1]
@@ -118,17 +134,22 @@ class Cost_estimator:
 		self.electrolyte_vol_in_ml = .00017*_2D_dim*1000000
 		manufacturing_cost = self.get_manu_cost(self.manufacturing_method, _2D_dim)
 		print(' ')
-		print ('Assuming an electrolyte thickness of 170 micrometers and a manufacturing-method-dependent electrode thickness of ' + str(self.manufacturing_thickness*100000) + ' meters')
-		print('MANUFACTURING COST for ' + self.manufacturing_method + ' = ' + str(manufacturing_cost))
+		print ('Assuming an electrolyte thickness of 170 microns and a manufacturing-method-dependent electrode thickness of ' + str(self.manufacturing_thickness*1000000) + ' microns')
+		print(' ')
+		print('MANUFACTURING COST for ' + self.manufacturing_method + ' = $' + str(manufacturing_cost))
 		self.total_cost = manufacturing_cost
 		print(' ')
 		print('MATERIAL COSTS:')
+		print('INGREDIENT          LAYER          COST ($)')
 		for key in self.recipe:
 			self.total_cost += self.calc_layer_cost(key)
+		self.total_cost += self.special_layers(self.add_layers)
 		print(' ')
 		print('TOTAL COST = $' + str(self.total_cost)[:4] + ' for ' + str(_2D_dim) + ' square meter(s)')
 		print(' ')
-		print('COST PER UNIT POWER = $' + str(self.total_cost/self.performance)[:4] + '/kW') # total cost times user-defined m^2/kW value
+		print('COST PER UNIT POWER = $' + str(self.total_cost/self.power_performance)[:4] + '/kW') # total cost times user-defined m^2/kW value
+		print('COST PER UNIT ENERGY = $' + str(self.total_cost/self.energy_performance)[:4] + '/kWh')
+
 
 	def convert_to_vol_ratio(self):
 		"""Retrieves the mass ratio of each component in the recipe, calculates

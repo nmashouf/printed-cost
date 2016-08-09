@@ -76,7 +76,7 @@ class Cost_estimator:
 		cell = self.manufacturing_worksheet.find(manu_method)
 		row_number = cell.row
 		manu_cost = float(self.manufacturing_worksheet.acell('C'+str(row_number)).value)
-		return manu_cost*print_2D_dim*len(recipe)
+		return manu_cost*print_2D_dim*(3+len(self.add_layers)) #3 as a standard for a simple 3-layer device
 
 	def get_manu_thickness(self, manu_method):
 		cell = self.manufacturing_worksheet.find(manu_method)
@@ -136,7 +136,7 @@ class Cost_estimator:
 		print(' ')
 		print ('Assuming an electrolyte thickness of 170 microns and a manufacturing-method-dependent electrode thickness of ' + str(self.manufacturing_thickness*1000000) + ' microns')
 		print(' ')
-		print('MANUFACTURING COST for ' + self.manufacturing_method + ' = $' + str(manufacturing_cost))
+		print('MANUFACTURING COST for ' + self.manufacturing_method + ' = $' + str(manufacturing_cost)[:4])
 		self.total_cost = manufacturing_cost
 		print(' ')
 		print('MATERIAL COSTS:')

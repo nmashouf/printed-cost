@@ -12,7 +12,7 @@ How to run:
 1. Open command line (Terminal on a Mac) and go to the same folder this file is saved in.
 2. Execute the code in interactive mode: python -i estimator.py
 3. Create a Cost_estimator instance (example -->) : 
-c = Cost_estimator({'electrode': [['AC', 17], ['AB', 1], ['GR', 2], ['PVDFHFP', 5], ['NMP', 40]], 'electrolyte': [['BMIMBF4', 1], ['PVDFHFP', 1]]}, [1, 1], 'flexographic', 'Cheap Materials', .0000001/.000001, 1, ['NMP'])
+c = Cost_estimator({'electrode': [['AC', 17], ['AB', 1], ['GR', 2], ['PVDFHFP', 5], ['NMP', 40]], 'electrolyte': [['BMIMBF4', 1], ['PVDFHFP', 1]]}, [1, 1], 'flexographic', 'Cheap Materials', .0000001/.000001, 1, ['GR'])
 4. Run the calculation: c.calculate_costs()
 
 """
@@ -76,7 +76,7 @@ class Cost_estimator:
 		cell = self.manufacturing_worksheet.find(manu_method)
 		row_number = cell.row
 		manu_cost = float(self.manufacturing_worksheet.acell('C'+str(row_number)).value)
-		return manu_cost*print_2D_dim*(3+len(self.add_layers)) #3 as a standard for a simple 3-layer device
+		return manu_cost*print_2D_dim*(self.num_layers())
 
 	def get_manu_thickness(self, manu_method):
 		cell = self.manufacturing_worksheet.find(manu_method)
@@ -88,6 +88,17 @@ class Cost_estimator:
 		if n == 0:
 			return ''
 		return ' ' + self.spaces(n-1)
+
+	def num_layers(self):
+		num = len(self.recipe)
+		for key in self.recipe:
+			if key == 'electrode':
+				num += 1
+			else:
+				num += 0
+		if self.add_layers:
+			num += len(self.add_layers)		
+		return num
 
 
 ### Abstraction Barrier ###
@@ -102,7 +113,7 @@ class Cost_estimator:
 		elif key == 'electrolyte':
 			volume = self.electrolyte_vol_in_ml
 		else:
-			return 'layer not recognized!'
+			return 'layer type not recognized!'
 		layer_recipe = self.recipe[key]
 		for ingredient_pair in layer_recipe:
 			ingredient_name = self.get_name(ingredient_pair)
@@ -136,7 +147,7 @@ class Cost_estimator:
 		print(' ')
 		print ('Assuming an electrolyte thickness of 170 microns and a manufacturing-method-dependent electrode thickness of ' + str(self.manufacturing_thickness*1000000) + ' microns')
 		print(' ')
-		print('MANUFACTURING COST for ' + self.manufacturing_method + ' = $' + str(manufacturing_cost)[:4])
+		print('MANUFACTURING COST to print all layers with ' + self.manufacturing_method + ' = $' + str(manufacturing_cost)[:5])
 		self.total_cost = manufacturing_cost
 		print(' ')
 		print('MATERIAL COSTS:')
@@ -147,10 +158,10 @@ class Cost_estimator:
 		print(' ')
 		print('TOTAL COST = $' + str(self.total_cost)[:4] + ' for ' + str(_2D_dim) + ' square meter(s)')
 		print(' ')
-		cost_per_power = self.total_cost/self.power_performance
-		cost_per_energy = self.total_cost/self.energy_performance
-		print('COST PER UNIT POWER = $' + str(cost_per_power)[:4] + '/kW') # total cost times user-defined m^2/kW value
-		print('COST PER UNIT ENERGY = $' + str(cost_per_energy)[:4] + '/kWh')
+		#cost_per_power = self.total_cost/self.power_performance
+		#cost_per_energy = self.total_cost/self.energy_performance
+		#print('COST PER UNIT POWER = $' + str(cost_per_power)[:4] + '/kW') # total cost times user-defined m^2/kW value
+		#print('COST PER UNIT ENERGY = $' + str(cost_per_energy)[:4] + '/kWh')
 		return self.total_cost #plot performance on ragone plot of other product's performance
 
 	def convert_to_vol_ratio(self):
@@ -163,9 +174,9 @@ class Cost_estimator:
 			layer_recipe = self.recipe[key]
 			for i in range(len(layer_recipe)): # iterate through each ingredient
 				ingredient_pair = layer_recipe[i]
-				mass_ratio = self.get_ratio(ingredient_pair) #get mass ratio from component_recipe in format ['name', mass ratio]
+				mass_ratio = self.get_ratio(ingredient_pair) # get mass ratio from component_recipe in format ['name', mass ratio] (mass ratio really refers to parts by mass)
 				ingredient_name = self.get_name(ingredient_pair)
-				volume = mass_ratio/self.get_density(ingredient_name) #mass_ratio times bulk density
+				volume = mass_ratio/self.get_density(ingredient_name) # mass_ratio divided by bulk density (1:1 volume)
 				vol_dict[ingredient_name] = volume
 				total_vol += volume
 			for i in range(len(layer_recipe)):

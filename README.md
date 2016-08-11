@@ -31,7 +31,7 @@ The parameters for the Cost_estimator class are:
 
 Note: if you want two of the same layer, either double your layer thickness and put a 2 as the first character in the layer name, or repeat the dictionary entry twice. Example (54 is original electrode thickness, 54*2 = 108): 
 ```
-c = Cost_estimator({'2 electrode': [[['AC', 17], ['AB', 1], ['GR', 2], ['PVDFHFP', 5], ['NMP', 40]], 108], 'electrolyte': [[['BMIMBF4', 1], ['PVDFHFP', 1]], 250], 'current collector': [[['AG', 1]], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001)
+c = Cost_estimator({'2 electrode': [[['AC', 17, 'p'], ['AB', 1, 'p'], ['GR', 2, 'p'], ['PVDFHFP', 5, 'p'], ['NMP', 40, 'np']], 108], 'electrolyte': [[['BMIMBF4', 1, 'p'], ['PVDFHFP', 1, 'p']], 250], 'current collector': [[['AG', 1, 'p']], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001)
 ```
 4. Run the calculation: 
 ```

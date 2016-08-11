@@ -12,7 +12,7 @@ How to run:
 1. Open command line (Terminal on a Mac) and go to the same folder this file is saved in.
 2. Execute the code in interactive mode: python -i estimator.py
 3. Create a Cost_estimator instance (example -->) : 
-c = Cost_estimator({'electrode': [[['AC', 17], ['AB', 1], ['GR', 2], ['PVDFHFP', 5], ['NMP', 40]], ], 'electrolyte': [[['BMIMBF4', 1], ['PVDFHFP', 1]], 250], 'current collector': [[['AG', 1]], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001)
+c = Cost_estimator({'2 electrode': [[['AC', 17, 'p'], ['AB', 1, 'p'], ['GR', 2, 'p'], ['PVDFHFP', 5, 'p'], ['NMP', 40, 'np']], 108], 'electrolyte': [[['BMIMBF4', 1, 'p'], ['PVDFHFP', 1, 'p']], 250], 'current collector': [[['AG', 1, 'p']], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001)
 4. Run the calculation: c.calculate_costs()
 
 """
@@ -32,7 +32,7 @@ class Cost_estimator:
 
 	RECIPE is a dictionary with user-defined keys that name the layer (must be under 20 characters. ex. 'electrode', 'electrolyte', 'current collector').
 	 	Each key has a 2D list as its value: the first term is a list of 2D vectors with ingredient information, the second term is the layer thickness in microns
-		ex. {'electrode': [[['AC', mass ratio #], ['GR', mass ratio #]], layer thickness in microns], 'electrolyte':[['BMIMBF4': mass ratio #], 250]}. Names are AC, AB, GR, PVDFHFP, NMP, BMIMBF4, ZN, MNO2, etc
+		ex. {'electrode': [[['AC', mass ratio #, persisting 'p' or not persisting 'np'], ['GR', mass ratio #, 'p']], layer thickness in microns], 'electrolyte':[['BMIMBF4', mass ratio #, 'p'], 250]}. Names are AC, AB, GR, PVDFHFP, NMP, BMIMBF4, ZN, MNO2, etc
 	DIMENSIONS is a 2D vector of dimension values in meters [length, width]
 	MANUFACTURING_METHOD is a string of the name of a manufacturing method ('flexographic', 'screen', 'blade coating')
 	COST_SOURCE is a string of the user preference of the cost source. Options are 'Cheap Materials' (from sources like Alibaba) or 'Reliable Materials' (from sources like Argonne NL cost analyses)
@@ -51,7 +51,6 @@ class Cost_estimator:
 		self.user_specified_materials_worksheet = database.worksheet(cost_source)
 		self.manufacturing_worksheet = database.worksheet("Manufacturing Method")
 		self.log_worksheet = database.worksheet("Log")
-		self.add_layers = add_layers
 		self.layer_thicknesses = []
 
 	def get_ratio(self, component):
@@ -92,12 +91,10 @@ class Cost_estimator:
 	def num_layers(self):
 		num = len(self.recipe)
 		for key in self.recipe:
-			if key == 'electrode':
+			if key[0] == '2':
 				num += 1
 			else:
-				num += 0
-		if self.add_layers:
-			num += len(self.add_layers)		
+				num += 0	
 		return num
 
 	def get_layer_thickness(self, key):
@@ -105,6 +102,9 @@ class Cost_estimator:
 
 	def get_layer_recipe(self, key):
 		return self.recipe[key][0]
+
+	def get_persist_info(self, component):
+		return component[2]
 
 ### Abstraction Barrier ###
 
@@ -124,11 +124,16 @@ class Cost_estimator:
 		return layer_total_cost
 
 	def report_layer_thicknesses(self):
-		print('Assuming wet thicknesses in microns:')
+		print('Assuming thicknesses in microns:')
 		for key in self.recipe:
 			layer_name = key
-			layer_thickness = self.recipe[key][1]
-			print(key + ' thickness = ' + str(layer_thickness))
+			layer_thickness = self.get_layer_thickness(key)
+			print(key)
+			print('    wet thickness = ' + str(layer_thickness))
+			for ingredient in self.get_layer_recipe(key):
+				if self.get_persist_info(ingredient) == 'np':
+					layer_thickness -= self.get_ratio(ingredient)*layer_thickness*self.footprint/self.footprint
+			print('    dry thickness = ' + str(layer_thickness))
 
 	def calculate_costs(self):
 		self.convert_to_vol_ratio()
@@ -140,7 +145,7 @@ class Cost_estimator:
 		self.total_cost = manufacturing_cost
 		print(' ')
 		print('MATERIAL COSTS:')
-		print('INGREDIENT          LAYER          COST ($)')
+		print('INGREDIENT          LAYER               COST ($)')
 		for key in self.recipe:
 			self.total_cost += self.calc_layer_cost(key)
 		print(' ')

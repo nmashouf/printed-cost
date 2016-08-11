@@ -91,8 +91,8 @@ class Cost_estimator:
 	def num_layers(self):
 		num = len(self.recipe)
 		for key in self.recipe:
-			if type(key[0]) == type(2):
-				num += int(key[0])
+			if key[1] == '*':
+				num += int(key[0])-1
 			else:
 				num += 0	
 		return num

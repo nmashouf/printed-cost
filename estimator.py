@@ -46,8 +46,7 @@ class Cost_estimator:
 		self.manufacturing_method = manufacturing_method
 		self.power_performance = power_performance
 		self.energy_performance = energy_performance
-		self.electrode_vol_in_ml = 0
-		self.electrolyte_vol_in_ml = 0
+		self.footprint = self.dimensions[0]*self.dimensions[1]
 		self.total_cost = 0
 		self.user_specified_materials_worksheet = database.worksheet(cost_source)
 		self.manufacturing_worksheet = database.worksheet("Manufacturing Method")
@@ -101,20 +100,19 @@ class Cost_estimator:
 			num += len(self.add_layers)		
 		return num
 
+	def get_layer_thickness(self, key):
+		return self.recipe[key][1]
+
+	def get_layer_recipe(self, key):
+		return self.recipe[key][0]
 
 ### Abstraction Barrier ###
 
 
 	def calc_layer_cost(self, key):
 		layer_total_cost = 0
-		if key == 'electrode' or key == 'layer':
-			volume = self.electrode_vol_in_ml
-		elif key == 'cathode' or key == 'anode':
-			volume = self.electrode_vol_in_ml/2
-		elif key == 'electrolyte':
-			volume = self.electrolyte_vol_in_ml
-		else:
-			return 'layer type not recognized!'
+		thickness = self.get_layer_thickness(key)
+		volume = thickness*self.footprint
 		layer_recipe = self.recipe[key][0]
 		for ingredient_pair in layer_recipe:
 			ingredient_name = self.get_name(ingredient_pair)
@@ -153,11 +151,7 @@ class Cost_estimator:
 
 	def calculate_costs(self):
 		self.convert_to_vol_ratio()
-		_2D_dim = self.dimensions[0]*self.dimensions[1]
-		self.manufacturing_thickness = self.get_manu_thickness(self.manufacturing_method)
-		self.electrode_vol_in_ml = _2D_dim*self.manufacturing_thickness*1000000*2 # 2 is for 2 electrodes
-		self.electrolyte_vol_in_ml = .00017*_2D_dim*1000000
-		manufacturing_cost = self.get_manu_cost(self.manufacturing_method, _2D_dim)
+		manufacturing_cost = self.get_manu_cost(self.manufacturing_method, self.footprint)
 		print(' ')
 		self.report_layer_thicknesses()
 		print(' ')
@@ -170,13 +164,13 @@ class Cost_estimator:
 			self.total_cost += self.calc_layer_cost(key)
 		self.total_cost += self.special_layers(self.add_layers)
 		print(' ')
-		print('TOTAL COST = $' + str(self.total_cost)[:4] + ' for ' + str(_2D_dim) + ' square meter(s)')
+		print('TOTAL COST = $' + str(self.total_cost)[:4] + ' for ' + str(self.footprint) + ' square meter(s)')
 		print(' ')
 		cost_per_power = self.total_cost/self.power_performance
 		cost_per_energy = self.total_cost/self.energy_performance
 		print('COST PER UNIT POWER = $' + str(cost_per_power) + '/kW') # total cost times user-defined m^2/kW value
 		print('COST PER UNIT ENERGY = $' + str(cost_per_energy) + '/kWh')
-		return self.total_cost #plot performance on ragone plot of other product's performance
+		return self.total_cost
 
 	def convert_to_vol_ratio(self):
 		"""Retrieves the mass ratio of each component in the recipe, calculates
@@ -185,7 +179,7 @@ class Cost_estimator:
 		for key in self.recipe: # iterate through each layer
 			total_vol = 0
 			vol_dict = {}
-			layer_recipe = self.recipe[key][0] # get recipe without layer thickness
+			layer_recipe = self.get_layer_recipe(key) # get recipe without layer thickness
 			for i in range(len(layer_recipe)): # iterate through each ingredient
 				ingredient_pair = layer_recipe[i]
 				mass_ratio = self.get_ratio(ingredient_pair) # get mass ratio from component_recipe in format ['name', mass ratio] (mass ratio really refers to parts by mass)
@@ -194,9 +188,9 @@ class Cost_estimator:
 				vol_dict[ingredient_name] = volume
 				total_vol += volume
 			for i in range(len(layer_recipe)):
-				ingredient_name = self.get_name(self.recipe[key][0][i])
+				ingredient_name = self.get_name(self.get_layer_recipe(key)[i])
 				new_vol_frac = vol_dict[ingredient_name]/total_vol
-				self.recipe[key][0][i][1] = new_vol_frac
+				self.get_layer_recipe(key)[i][1] = new_vol_frac
 
 
 

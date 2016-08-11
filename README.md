@@ -29,7 +29,7 @@ The parameters for the Cost_estimator class are:
 * POWER_PERFORMANCE is a value with units kW/m^2
 * ENERGY_PERFORMANCE is a value with units kWh/m^2
 
-Note: if you want two of the same layer, either put a 2 as the first character in the layer name, or repeat the dictionary entry twice. The "2" trick works for any single-digit number. Example: 
+Note: if you want multiple of the same layer, either put the multiple and a * as the first character in the layer name, or repeat the dictionary entry twice. The multiple* trick works for any single-digit number. Example: 
 ```
 c = Cost_estimator({'2* electrode': [[['AC', 17, 'p'], ['AB', 1, 'p'], ['GR', 2, 'p'], ['PVDFHFP', 5, 'p'], ['NMP', 40, 'np']], 54], 'electrolyte': [[['BMIMBF4', 1, 'p'], ['PVDFHFP', 1, 'p']], 250], 'current collector': [[['AG', 1, 'p']], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001)
 ```

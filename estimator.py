@@ -12,7 +12,7 @@ How to run:
 1. Open command line (Terminal on a Mac) and go to the same folder this file is saved in.
 2. Execute the code in interactive mode: python -i estimator.py
 3. Create a Cost_estimator instance (example -->) : 
-c = Cost_estimator({'2 electrode': [[['AC', 17, 'p'], ['AB', 1, 'p'], ['GR', 2, 'p'], ['PVDFHFP', 5, 'p'], ['NMP', 40, 'np']], 108], 'electrolyte': [[['BMIMBF4', 1, 'p'], ['PVDFHFP', 1, 'p']], 250], 'current collector': [[['AG', 1, 'p']], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001)
+c = Cost_estimator({'2* electrode': [[['AC', 17, 'p'], ['AB', 1, 'p'], ['GR', 2, 'p'], ['PVDFHFP', 5, 'p'], ['NMP', 40, 'np']], 54], 'electrolyte': [[['BMIMBF4', 1, 'p'], ['PVDFHFP', 1, 'p']], 250], 'current collector': [[['AG', 1, 'p']], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001)
 4. Run the calculation: c.calculate_costs()
 
 """
@@ -91,8 +91,8 @@ class Cost_estimator:
 	def num_layers(self):
 		num = len(self.recipe)
 		for key in self.recipe:
-			if key[0] == '2':
-				num += 1
+			if type(key[0]) == type(2):
+				num += int(key[0])
 			else:
 				num += 0	
 		return num
@@ -128,7 +128,11 @@ class Cost_estimator:
 		for key in self.recipe:
 			layer_name = key
 			layer_thickness = self.get_layer_thickness(key)
-			print(key)
+			if key[1] == '*':
+				self.recipe[key][1] = layer_thickness*int(key[0])
+				layer_name += ' (each layer individually)'
+				layer_name = layer_name[2:]
+			print(layer_name)
 			print('    wet thickness = ' + str(layer_thickness))
 			for ingredient in self.get_layer_recipe(key):
 				if self.get_persist_info(ingredient) == 'np':
@@ -148,6 +152,7 @@ class Cost_estimator:
 		print('INGREDIENT          LAYER               COST ($)')
 		for key in self.recipe:
 			self.total_cost += self.calc_layer_cost(key)
+		
 		print(' ')
 		print('TOTAL COST = $' + str(self.total_cost)[:6] + ' for ' + str(self.footprint) + ' square meter(s)')
 		print(' ')

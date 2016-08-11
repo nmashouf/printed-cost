@@ -38,10 +38,9 @@ class Cost_estimator:
 	COST_SOURCE is a string of the user preference of the cost source. Options are 'Cheap Materials' (from sources like Alibaba) or 'Reliable Materials' (from sources like Argonne NL cost analyses)
 	POWER_PERFORMANCE is a value with units kW/m^2
 	ENERGY_PERFORMANCE is a value with units kWh/m^2
-	ADD_LAYERS is a list of additional layers as strings. ex: [['AG', 35], ['AG', 35]] where 'AG' corresponds to a layer of silver as electrical connections.
 	"""
 	
-	def __init__(self, recipe, dimensions, manufacturing_method, cost_source, power_performance, energy_performance, add_layers=False):
+	def __init__(self, recipe, dimensions, manufacturing_method, cost_source, power_performance, energy_performance):
 		self.recipe = recipe
 		self.dimensions = dimensions
 		self.manufacturing_method = manufacturing_method

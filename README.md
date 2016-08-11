@@ -17,7 +17,7 @@ python -i estimator.py
 ```
 3. Create a Cost_estimator instance (example -->) : 
 ```
-c = Cost_estimator({'electrode': [[['AC', 17], ['AB', 1], ['GR', 2], ['PVDFHFP', 5], ['NMP', 40]], 54], 'electrolyte': [[['BMIMBF4', 1], ['PVDFHFP', 1]], 250]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001, [['GR', 35]])
+c = Cost_estimator({'electrode': [[['AC', 17], ['AB', 1], ['GR', 2], ['PVDFHFP', 5], ['NMP', 40]], 54], 'electrolyte': [[['BMIMBF4', 1], ['PVDFHFP', 1]], 250], 'current collector': [[['AG', 1]], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001)
 ```
 4. Run the calculation: 
 ```

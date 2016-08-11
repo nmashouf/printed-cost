@@ -17,16 +17,17 @@ python -i estimator.py
 ```
 3. Create a Cost_estimator instance. 
 The parameters for the Cost_estimator class are:
-Cost_estimator(recipe, dimensions, manufacturing_method, cost_source, power_performance, energy_performance)
 
-RECIPE is a dictionary with user-defined keys that name the layer (must be under 20 characters. ex. 'electrode', 'electrolyte', 'current collector').
-	 	Each key has a 2D list as its value: the first term is a list of 2D vectors with ingredient information, the second term is the layer thickness in microns
-		ex. {'electrode': [[['AC', mass ratio #], ['GR', mass ratio #]], layer thickness in microns], 'electrolyte':[['BMIMBF4': mass ratio #], 250]}. 
-	DIMENSIONS is a 2D vector of dimension values in meters [length, width]
-	MANUFACTURING_METHOD is a string of the name of a manufacturing method ('flexographic', 'screen', 'blade coating')
-	COST_SOURCE is a string of the user preference of the cost source. Options are 'Cheap Materials' (from sources like Alibaba) or 'Reliable Materials' (from sources like Argonne NL cost analyses)
-	POWER_PERFORMANCE is a value with units kW/m^2
-	ENERGY_PERFORMANCE is a value with units kWh/m^2
+> Cost_estimator(recipe, dimensions, manufacturing_method, cost_source, power_performance, energy_performance)
+
+>> RECIPE is a dictionary with user-defined keys that name the layer (must be under 20 characters. ex. 'electrode', 'electrolyte', 'current collector').
+	 	* Each key has a 2D list as its value: the first term is a list of 2D vectors with ingredient information, the second term is the layer thickness in microns
+		* ex. {'electrode': [[['AC', mass ratio #], ['GR', mass ratio #]], layer thickness in microns], 'electrolyte':[['BMIMBF4': mass ratio #], 250]}. 
+* DIMENSIONS is a 2D vector of dimension values in meters [length, width]
+* MANUFACTURING_METHOD is a string of the name of a manufacturing method ('flexographic', 'screen', 'blade coating')
+* COST_SOURCE is a string of the user preference of the cost source. Options are 'Cheap Materials' (from sources like Alibaba) or 'Reliable Materials' (from sources like Argonne NL cost analyses)
+* POWER_PERFORMANCE is a value with units kW/m^2
+* ENERGY_PERFORMANCE is a value with units kWh/m^2
 
 Note: if you want two of the same layer, either double your layer thickness or repeat the dictionary entry twice. Example (54 is original electrode thickness, 54*2 = 108): 
 ```

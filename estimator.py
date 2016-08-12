@@ -12,7 +12,7 @@ How to run:
 1. Open command line (Terminal on a Mac) and go to the same folder this file is saved in.
 2. Execute the code in interactive mode: python -i estimator.py
 3. Create a Cost_estimator instance (example -->) : 
-c = Cost_estimator({'2* electrode': [[['AC', 17, 'p'], ['AB', 1, 'p'], ['GR', 2, 'p'], ['PVDFHFP', 5, 'p'], ['NMP', 40, 'np']], 54], 'electrolyte': [[['BMIMBF4', 1, 'p'], ['PVDFHFP', 1, 'p']], 250], 'current collector': [[['AG', 1, 'p']], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001)
+c = Cost_estimator({'2* electrode': [[['AC', 17, 'p'], ['AB', 1, 'p'], ['GR', 2, 'p'], ['PVDFHFP', 2.2222, 'p'], ['NMP', 17.7778, 'np'], ['BMIMBF4', 11, 'np']], 54], 'electrolyte': [[['BMIMBF4', 2, 'p'], ['PVDFHFP', 1, 'p'], ['NMP', 3, 'np']], 250], 'current collector': [[['AG', 1, 'p']], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001)
 4. Run the calculation: c.calculate_costs()
 
 """
@@ -193,7 +193,8 @@ class Cost_estimator:
 					if len(self.recipe[key]) == 3:
 						self.recipe[key][2] = self.recipe[key][2] - new_vol_frac*(1-solid_loading)/self.footprint
 					else:
-						self.recipe[key] += [self.get_layer_thickness(key) - new_vol_frac*(1-solid_loading)/self.footprint]
+						layer_t = self.get_layer_thickness(key)
+						self.recipe[key] += [layer_t - layer_t*new_vol_frac*(1-solid_loading)/self.footprint]
 
 
 

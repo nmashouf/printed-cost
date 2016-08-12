@@ -12,7 +12,7 @@ How to run:
 1. Open command line (Terminal on a Mac) and go to the same folder this file is saved in.
 2. Execute the code in interactive mode: python -i estimator.py
 3. Create a Cost_estimator instance (example -->) : 
-c = Cost_estimator({'2* electrode': [[['AC', 17, 'p'], ['AB', 1, 'p'], ['GR', 2, 'p'], ['PVDFHFP', 2.2222, 'p'], ['NMP', 17.7778, 'np'], ['BMIMBF4', 11, 'np']], 54], 'electrolyte': [[['BMIMBF4', 2, 'p'], ['PVDFHFP', 1, 'p'], ['NMP', 3, 'np']], 250], 'current collector': [[['AG', 1, 'p']], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001, 'recipe1.csv')
+c = Cost_estimator({'2* electrode': [[['AC', 17, 'p'], ['AB', 1, 'p'], ['GR', 2, 'p'], ['PVDFHFP', 2.2222, 'p'], ['NMP', 17.7778, 'np'], ['BMIMBF4', 11, 'np']], 54], 'electrolyte': [[['BMIMBF4', 2, 'p'], ['PVDFHFP', 1, 'p'], ['NMP', 3, 'np']], 250], 'current collector': [[['Dupont_5025', 1, 'p']], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001, 'recipe1.csv')
 4. Run the calculation: c.calculate_costs()
 
 """

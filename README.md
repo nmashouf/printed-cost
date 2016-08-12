@@ -28,10 +28,11 @@ The parameters for the Cost_estimator class are:
 * COST_SOURCE is a string of the user preference of the cost source. Options are 'Cheap Materials' (from sources like Alibaba) or 'Reliable Materials' (from sources like Argonne NL cost analyses)
 * POWER_PERFORMANCE is a value with units kW/m^2
 * ENERGY_PERFORMANCE is a value with units kWh/m^2
+* FILENAME is an optional argument that is a string that will name the output file
 
 Note: if you want multiple of the same layer, either put the multiple and a * as the first character in the layer name, or repeat the dictionary entry twice. The multiple* trick works for any single-digit number. Example: 
 ```
-c = Cost_estimator({'2* electrode': [[['AC', 17, 'p'], ['AB', 1, 'p'], ['GR', 2, 'p'], ['PVDFHFP', 5, 'p'], ['NMP', 40, 'np']], 54], 'electrolyte': [[['BMIMBF4', 1, 'p'], ['PVDFHFP', 1, 'p']], 250], 'current collector': [[['AG', 1, 'p']], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001)
+c = Cost_estimator({'2* electrode': [[['AC', 17, 'p'], ['AB', 1, 'p'], ['GR', 2, 'p'], ['PVDFHFP', 2.2222, 'p'], ['NMP', 17.7778, 'np'], ['BMIMBF4', 11, 'np']], 54], 'electrolyte': [[['BMIMBF4', 2, 'p'], ['PVDFHFP', 1, 'p'], ['NMP', 3, 'np']], 250], 'current collector': [[['Dupont_5025', 1, 'p']], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001, 'recipe1.csv')
 ```
 4. Run the calculation: 
 ```

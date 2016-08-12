@@ -51,8 +51,6 @@ class Cost_estimator:
 		self.user_specified_materials_worksheet = database.worksheet(cost_source)
 		self.manufacturing_worksheet = database.worksheet("Manufacturing Method")
 		self.log_worksheet = database.worksheet("Log")
-		self.layer_thicknesses = []
-		self.liquid_loading = {}
 
 	def get_ratio(self, component):
 		return component[1]

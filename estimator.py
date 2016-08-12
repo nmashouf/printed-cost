@@ -52,6 +52,7 @@ class Cost_estimator:
 		self.manufacturing_worksheet = database.worksheet("Manufacturing Method")
 		self.log_worksheet = database.worksheet("Log")
 		self.layer_thicknesses = []
+		self.liquid_loading = {}
 
 	def get_ratio(self, component):
 		return component[1]
@@ -64,6 +65,12 @@ class Cost_estimator:
 		row_number = cell.row
 		density = float(self.user_specified_materials_worksheet.acell('E'+str(row_number)).value)
 		return density
+
+	def get_solid_loading(self, name):
+		cell = self.user_specified_materials_worksheet.find(name)
+		row_number = cell.row
+		solid_loading = float(self.user_specified_materials_worksheet.acell('G'+str(row_number)).value)
+		return solid_loading
 
 	def get_material_cost(self, name):
 		cell = self.user_specified_materials_worksheet.find(name)
@@ -134,6 +141,8 @@ class Cost_estimator:
 				layer_name = layer_name[2:]
 			print(layer_name)
 			print('    wet thickness = ' + str(layer_thickness))
+			if len(self.recipe[key]) == 3:
+					layer_thickness = self.recipe[key][2] # if layer contains ingredient with solid_loading != 1, then start with thickness not including the liquid loading portion
 			for ingredient in self.get_layer_recipe(key):
 				if self.get_persist_info(ingredient) == 'np':
 					layer_thickness -= self.get_ratio(ingredient)*layer_thickness*self.footprint/self.footprint
@@ -152,7 +161,6 @@ class Cost_estimator:
 		print('INGREDIENT          LAYER               COST ($)')
 		for key in self.recipe:
 			self.total_cost += self.calc_layer_cost(key)
-		
 		print(' ')
 		print('TOTAL COST = $' + str(self.total_cost)[:6] + ' for ' + str(self.footprint) + ' square meter(s)')
 		print(' ')
@@ -181,6 +189,13 @@ class Cost_estimator:
 				ingredient_name = self.get_name(self.get_layer_recipe(key)[i])
 				new_vol_frac = vol_dict[ingredient_name]/total_vol
 				self.get_layer_recipe(key)[i][1] = new_vol_frac
+				### check solid loading ###
+				solid_loading = self.get_solid_loading(ingredient_name)
+				if solid_loading != 1:
+					if len(self.recipe[key]) == 3:
+						self.recipe[key][2] = self.recipe[key][2] - new_vol_frac*(1-solid_loading)/self.footprint
+					else:
+						self.recipe[key] += [self.get_layer_thickness(key) - new_vol_frac*(1-solid_loading)/self.footprint]
 
 
 

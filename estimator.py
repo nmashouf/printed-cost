@@ -12,11 +12,12 @@ How to run:
 1. Open command line (Terminal on a Mac) and go to the same folder this file is saved in.
 2. Execute the code in interactive mode: python -i estimator.py
 3. Create a Cost_estimator instance (example -->) : 
-c = Cost_estimator({'2* electrode': [[['AC', 17, 'p'], ['AB', 1, 'p'], ['GR', 2, 'p'], ['PVDFHFP', 2.2222, 'p'], ['NMP', 17.7778, 'np'], ['BMIMBF4', 11, 'np']], 54], 'electrolyte': [[['BMIMBF4', 2, 'p'], ['PVDFHFP', 1, 'p'], ['NMP', 3, 'np']], 250], 'current collector': [[['AG', 1, 'p']], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001)
+c = Cost_estimator({'2* electrode': [[['AC', 17, 'p'], ['AB', 1, 'p'], ['GR', 2, 'p'], ['PVDFHFP', 2.2222, 'p'], ['NMP', 17.7778, 'np'], ['BMIMBF4', 11, 'np']], 54], 'electrolyte': [[['BMIMBF4', 2, 'p'], ['PVDFHFP', 1, 'p'], ['NMP', 3, 'np']], 250], 'current collector': [[['AG', 1, 'p']], 35]}, [1, 1], 'flexographic', 'Cheap Materials', .01, .0001, 'recipe1.csv')
 4. Run the calculation: c.calculate_costs()
 
 """
 import gspread
+import numpy
 from oauth2client.service_account import ServiceAccountCredentials
 
 scope = ['https://spreadsheets.google.com/feeds']
@@ -38,9 +39,10 @@ class Cost_estimator:
 	COST_SOURCE is a string of the user preference of the cost source. Options are 'Cheap Materials' (from sources like Alibaba) or 'Reliable Materials' (from sources like Argonne NL cost analyses)
 	POWER_PERFORMANCE is a value with units kW/m^2
 	ENERGY_PERFORMANCE is a value with units kWh/m^2
+	FILENAME is an optional argument that is a string that will name the output file
 	"""
 	
-	def __init__(self, recipe, dimensions, manufacturing_method, cost_source, power_performance, energy_performance):
+	def __init__(self, recipe, dimensions, manufacturing_method, cost_source, power_performance, energy_performance, filename=False):
 		self.recipe = recipe
 		self.dimensions = dimensions
 		self.manufacturing_method = manufacturing_method
@@ -51,6 +53,8 @@ class Cost_estimator:
 		self.user_specified_materials_worksheet = database.worksheet(cost_source)
 		self.manufacturing_worksheet = database.worksheet("Manufacturing Method")
 		self.log_worksheet = database.worksheet("Log")
+		self.reporting_list = [['USER INPUT', ' ', ' '],['recipe', ' ', str(recipe)], ['dimensions', ' ', str(dimensions)], ['manufacturing_method', ' ', str(manufacturing_method)], ['cost source', ' ', str(cost_source)], ['power performance', ' ', str(power_performance)], ['energy performance', ' ', str(energy_performance)], [' ', ' ', ' ']]
+		self.filename = filename
 
 	def get_ratio(self, component):
 		return component[1]
@@ -117,19 +121,21 @@ class Cost_estimator:
 	def calc_layer_cost(self, key):
 		layer_total_cost = 0
 		thickness = self.get_layer_thickness(key)
-		volume = thickness*self.footprint
+		volume = thickness*.000001*self.footprint*1000000 #.000001 to go from micron to m, 1000000 to go from m3 to ml
 		layer_recipe = self.recipe[key][0]
 		for ingredient_pair in layer_recipe:
 			ingredient_name = self.get_name(ingredient_pair)
 			volume_contribution = self.get_ratio(ingredient_pair)*volume
 			mass_contribution = volume_contribution*self.get_density(ingredient_name)
 			cost_contribution = mass_contribution*self.get_material_cost(ingredient_name)
-			print(str(ingredient_name) + self.spaces(20-len(ingredient_name)) + key + self.spaces(20-len(key)) + str(cost_contribution)[:6])
+			print(str(ingredient_name) + self.spaces(20-len(ingredient_name)) + key + self.spaces(20-len(key)) + str(cost_contribution))
+			self.reporting_list += [[str(ingredient_name), str(key), cost_contribution]]
 			layer_total_cost += cost_contribution
 		return layer_total_cost
 
 	def report_layer_thicknesses(self):
 		print('Assuming thicknesses in microns:')
+		self.reporting_list += [['Assuming Thicknesses:', ' ', ' ']]
 		for key in self.recipe:
 			layer_name = key
 			layer_thickness = self.get_layer_thickness(key)
@@ -138,12 +144,14 @@ class Cost_estimator:
 				layer_name += ' (each layer individually)'
 				layer_name = layer_name[2:]
 			print(layer_name)
+			self.reporting_list += [[key, 'wet', layer_thickness]]
 			print('    wet thickness = ' + str(layer_thickness))
 			if len(self.recipe[key]) == 3:
 					layer_thickness = self.recipe[key][2] # if layer contains ingredient with solid_loading != 1, then start with thickness not including the liquid loading portion
 			for ingredient in self.get_layer_recipe(key):
 				if self.get_persist_info(ingredient) == 'np':
 					layer_thickness -= self.get_ratio(ingredient)*layer_thickness*self.footprint/self.footprint
+			self.reporting_list += [[' ', 'dry', layer_thickness]]
 			print('    dry thickness = ' + str(layer_thickness))
 
 	def calculate_costs(self):
@@ -157,15 +165,21 @@ class Cost_estimator:
 		print(' ')
 		print('MATERIAL COSTS:')
 		print('INGREDIENT          LAYER               COST ($)')
+		self.reporting_list += [[' ', ' ', ' '],['SOURCE', ' ', 'COST ($)'], ['Manufacturing', ' ', ' '], [self.manufacturing_method, ' ', manufacturing_cost], ['Material', ' ', ' ']]
 		for key in self.recipe:
 			self.total_cost += self.calc_layer_cost(key)
 		print(' ')
 		print('TOTAL COST = $' + str(self.total_cost)[:6] + ' for ' + str(self.footprint) + ' square meter(s)')
+		self.reporting_list += [['TOTAL', ' ', self.total_cost]]
 		print(' ')
 		cost_per_power = self.total_cost/self.power_performance
 		cost_per_energy = self.total_cost/self.energy_performance
 		print('COST PER UNIT POWER = $' + str(cost_per_power) + '/kW') # total cost times user-defined m^2/kW value
 		print('COST PER UNIT ENERGY = $' + str(cost_per_energy) + '/kWh')
+		self.reporting_list += [[' ', ' ', ' '], ['Cost Performance', ' ', ' '], ['Cost/Power', cost_per_power, '/kW'], ['Cost/Energy', cost_per_energy, '/kWh']]
+		if self.filename:
+			np_reporting = numpy.array(self.reporting_list)
+			numpy.savetxt(self.filename, np_reporting, fmt="%s", delimiter=",")
 		return self.total_cost
 
 	def convert_to_vol_ratio(self):
@@ -191,10 +205,10 @@ class Cost_estimator:
 				solid_loading = self.get_solid_loading(ingredient_name)
 				if solid_loading != 1:
 					if len(self.recipe[key]) == 3:
-						self.recipe[key][2] = self.recipe[key][2] - new_vol_frac*(1-solid_loading)/self.footprint
+						self.recipe[key][2] = self.recipe[key][2] - new_vol_frac*(1-solid_loading)
 					else:
 						layer_t = self.get_layer_thickness(key)
-						self.recipe[key] += [layer_t - layer_t*new_vol_frac*(1-solid_loading)/self.footprint]
+						self.recipe[key] += [layer_t - (layer_t*new_vol_frac*(1-solid_loading))]
 
 
 
